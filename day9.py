@@ -143,7 +143,65 @@ def show_plot(head_data: list, tail_data: list) -> None:
 
     return
 
+def show_plot_two(data: list[list[tuple[int,int]]]) -> None:
+    # create two axis, wide view / close view
+    # wide view has const x and y limit
+    # close view does not
 
+    # view limits for wide plot
+    head_x_data = [x[0] for x in data[0][:]]
+    head_y_data = [y[1] for y in data[0][:]]
+
+    head_x_max = max(head_x_data)
+    head_y_max = max(head_y_data)
+
+    head_x_min = min(head_x_data)
+    head_y_min = min(head_y_data)
+
+
+    def animate(i):
+        # ax is wide
+        ax.clear()
+        ax.set(xlim=(head_x_min - 5, head_x_max + 5), ylim=(head_y_min - 5, head_y_max + 5))
+
+        for knot in range(len(data[:])):
+            ax.plot(data[knot][i][0], data[knot][i][1], 'r+', linestyle="--")
+
+
+
+
+
+
+        # ax2 is close
+        ax2.clear()
+
+        # view limits
+        xlim = (data[-1][i][0] - 12, data[-1][i][0] + 12)
+        ylim = (data[-1][i][1] - 12, data[-1][i][1] + 12)
+
+        ax2.set(xlim=xlim , ylim=ylim)
+
+        ax2.set_yticks(ticks=[x for x in range(ylim[0], ylim[1])])
+        ax2.set_xticks(ticks=[x for x in range(xlim[0], xlim[1])])
+
+        for knot in range(len(data[:])):
+            ax2.plot(data[knot][i][0], data[knot][i][1], 'r+', linestyle="--")
+
+        return
+
+    fig, (ax, ax2) = plt.subplots(1,2)
+
+
+    ani = matplotlib.animation.FuncAnimation(fig, animate, frames=len(head_x_data), repeat=False, interval=50, cache_frame_data=False)
+
+    plt.show()
+    #save_path = 'AdventOfCode2022\\day9visual.gif'
+    #writergif = matplotlib.animation.PillowWriter(fps=30)
+
+    #ani.save(save_path, writer=writergif)
+    #print('saved gif')
+
+    return
 
 def part_one(moves: list, plot_img: bool) -> int:
     """returns number of visited squares"""
@@ -208,6 +266,90 @@ def part_one(moves: list, plot_img: bool) -> int:
 
     return visited
 
+
+def part_two(moves:list) -> int:
+    """now theres more of these things"""
+    # same thing but now ten knots, use update tail for each  knots position in order
+        # initiate some stuff
+    NUM_KNOTS = 10
+    knot_pos_list = [node(0,0) for x in range(NUM_KNOTS)]
+    
+    # nested, each column represents one knot
+    visited_pos_table = [[(0,0)] for x in range(NUM_KNOTS)]
+
+
+    for count, move in enumerate(moves):
+        # check tail after each head move, cant be further than one
+        direction, distance = move.split()
+        distance = int(distance)
+
+        # new position for head
+        if direction == 'R':
+            #move head once, adjust each knot , move head once etc..
+            for head_movement in range(distance):
+                # move head 1
+                knot_pos_list[0].x += 1
+                # adjust knots down the line
+                for i in range(1, NUM_KNOTS):
+                    #adjust next knot
+                    knot_pos_list[i] = update_tail(knot_pos_list[i - 1],  knot_pos_list[i])
+                    for knot in range(NUM_KNOTS):
+                        # update new positions chart
+                        visited_pos_table[knot].append((knot_pos_list[knot].x, knot_pos_list[knot].y))
+        
+        elif direction == 'L':
+
+           #move head once, adjust each knot , move head once etc..
+            for head_movement in range(distance):
+                # move head 1
+                knot_pos_list[0].x -= 1
+                # adjust knots down the line
+                for i in range(1, NUM_KNOTS):
+                    #adjust next knot
+                    knot_pos_list[i] = update_tail(knot_pos_list[i - 1],  knot_pos_list[i])
+                    for knot in range(NUM_KNOTS):
+                        # update new positions chart
+                        visited_pos_table[knot].append((knot_pos_list[knot].x, knot_pos_list[knot].y))
+
+
+
+        elif direction == 'U':
+            #move head once, adjust each knot , move head once etc..
+            for head_movement in range(distance):
+                # move head 1
+                knot_pos_list[0].y += 1
+                # adjust knots down the line
+                for i in range(1, NUM_KNOTS):
+                    #adjust next knot
+                    knot_pos_list[i] = update_tail(knot_pos_list[i - 1],  knot_pos_list[i])
+                    for knot in range(NUM_KNOTS):
+                        # update new positions chart
+                        visited_pos_table[knot].append((knot_pos_list[knot].x, knot_pos_list[knot].y))
+
+                        # next knot until all checked
+        elif direction == 'D':
+        #move head once, adjust each knot , move head once etc..
+            for head_movement in range(distance):
+                # move head 1
+                knot_pos_list[0].y -= 1
+                # adjust knots down the line
+                for i in range(1, NUM_KNOTS):
+                    #adjust next knot
+                    knot_pos_list[i] = update_tail(knot_pos_list[i - 1],  knot_pos_list[i])
+                    for knot in range(NUM_KNOTS):
+                        # update new positions chart
+                        visited_pos_table[knot].append((knot_pos_list[knot].x, knot_pos_list[knot].y))
+
+                    # next knot until all checked
+
+        # next movement
+    tail_knot_visited = visited_pos_table[-1][:]
+    visited = len(set(tail_knot_visited))
+
+    # show_plot_two(data = visited_pos_table)
+    
+    return visited
+
 if __name__ == "__main__":
     path = 'AdventOfCode2022\\Day9_input.txt'
     test_path = 'AdventOfCode2022\\Day9_test_input.txt'
@@ -215,4 +357,5 @@ if __name__ == "__main__":
     with open(path, 'rt', encoding='UTF-8') as inputfile:
         moves = [x.strip('\n') for x in inputfile.readlines()]
 
-    print(part_one(moves, True))
+    #print(part_one(moves, True))
+    print(part_two(moves))
