@@ -1,5 +1,9 @@
 """gotta get my stuff back"""
-from matplotlib import pyplot as plt
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+import numpy as np
+import seaborn as sns
+
 import sys # needed for bignum config
 
 sys.set_int_max_str_digits(100000000)
@@ -69,18 +73,71 @@ Monkey 2:
 
 
 def plot_one(history):
-    ax = plt.figure().add_subplot(projection='3d')
-    for x in history[0]:
-        y = [0 for _ in x]
-        x = [int(x) for x in x]
-        print(x)
-        ax.plot(x, y)
+    
+    
+    fig = plt.figure(figsize=(10,10))
+    
+    plt.style.use('seaborn-pastel')
+    ax = fig.add_subplot(projection='3d')
+    ticks = [x for x in range(1, len(history) + 1)]
+    labels=[f'monkey {x}' for x in range(1, len(history) + 1)]
+    
+    # plot monkey positions first, THEN thier items. do per item switch
+
+    #do for length of history (total throws or catches)
+
+
+    # each monkey needs plotted only once per "frame"
+    #for index, x in enumerate(history):
+        #ax.plot(index, 1)
+
+    def animate(i):
+        
+        # do once for each monkey per frame
+        ax.clear()
+       
+        ax.set_title(f'Trade: {i}')
+        
+        ax.set_xlabel('')
+        ax.set_ylabel('Num of items held per trade')
+        
+        ax.set_xticks(ticks=ticks, labels=labels, rotation=45)
+
+        for count, monkey in enumerate(history):
+            # for each item the monkey carries 
+            #for count, items in enumerate(history[monkey][i][:]):
+
+            num_items = len(monkey[i][:])
+            x = [count]
+            y = [num_items]
+            z = [0]
+
+            dx = [.5]
+            dy = [min([num_items, 7])]
+            dz = [num_items]
+
+            ax.invert_xaxis()
+            ax.invert_yaxis()
+            
+
+            
+
+            ax.bar3d(x, y, z, dx, dy, dz)
+            ax.view_init(26, 80)
+
+    ani = animation.FuncAnimation(fig, animate, frames=len(history[0]), repeat=False, interval=20, cache_frame_data=False)
+    writergif = animation.PillowWriter(fps=35)
+
+    ani.save('AdventOfCode2022\\day11_visual.gif', writergif)
+
+    
+    
     plt.show()
 
 def part_one(data: list) -> int:
     """returns level of monkey business after 20 rounds"""
     # monkey business is two active monkeys sum inspections, multiplied
-    # ex: money 3 and 4 are most active with a sum of 10 and 10
+    # ex: money 3 and 4 are most active with a sum of 10 and 10 
     # monkey busniess = 10 * 10
 
    
@@ -100,7 +157,7 @@ def part_one(data: list) -> int:
                 troop[catcher].catch_item(item_to_throw)
 
                 for x in range(len(troop)):
-                    history[x].append(monkey.items[:])
+                    history[x].append(troop[x].items[:])
 
 
 
@@ -171,5 +228,5 @@ if __name__ == "__main__":
     with open(path, 'rt', encoding='UTF-8') as inputfile:
         monkeys = inputfile.read().split('\n\n')
 
-    # print(part_one(monkeys))
-    print(part_two(monkeys))
+    print(part_one(monkeys))
+    #print(part_two(monkeys))
