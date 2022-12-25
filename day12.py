@@ -3,8 +3,10 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 sys.setrecursionlimit(5000)
+
+
 # start node is 0, 20
-# end at 20, 45
+# end at 20, 145
 
 # for each step, check if can step
 # if true step into square
@@ -14,7 +16,7 @@ sys.setrecursionlimit(5000)
 #if end is found, return path_count
 
 path = 'AdventOfCode2022\\Day12_input.txt'
-test_path = 'AdventOfCode2022\\Day11_test_input.txt'
+test_path = 'AdventOfCode2022\\Day12_test_input.txt'
 
 with open(path, 'rt', encoding='UTF-8') as inputfile:
     elev_map = inputfile.read().strip().split('\n')
@@ -26,38 +28,41 @@ step_hist = []
 
 edge_right = len(elev_map[0]) -1
 edge_bottom = len(elev_map) -1 
+global found 
+found = False
 
 
 
 def can_step(pos:int, next_step:tuple) -> bool:
-
-#############################(This also means that the elevation of the destination square can be much lower than the elevation of your current square.)###############################
 
 
     # reached an edge of map
     if next_step[0] < 0 or next_step[0] == edge_bottom or next_step[1] < 0 or next_step[1] == edge_right:
         return False
 
+
+
     ord_next_step = ord(elev_map[next_step[0]][next_step[1]])
 
 
+    #if --- same height-------------one step higher------------------lower than 
 
-    #if its same height-------------one step higher---------------lower than NEED THIS VALUE CHANGED BUT plt.show() doesnt work if i do
+    if (pos <= ord_next_step) or (pos == ord_next_step - 1) or ord_next_step == 69: #or (pos > ord_next_step)
 
-    if (pos == ord_next_step) or (pos == ord_next_step - 1) or (pos == ord_next_step + 1):
 
         #check if been there before
         if not visited[next_step[0]][next_step[1]]:
 
-            # check if reaching high points
-            #if ord_next_step in [x for x in range(107, 121)]:
-                #print(f'found: {ord_next_step}')
 
             return True
+
     return False
 
 
-def find_shortest_path(current_pos:tuple, elav_map:list, path_count:int, found=False) -> int:
+def find_shortest_path(current_pos:tuple, end_pos:tuple, elav_map:list, path_count:int) -> int:
+    global found
+
+    print(f'step to {current_pos}')
 
     path_count = path_count + 1
 
@@ -65,6 +70,7 @@ def find_shortest_path(current_pos:tuple, elav_map:list, path_count:int, found=F
     visited[current_pos[0]][current_pos[1]] = True
 
     pos_int = ord(elav_map[current_pos[0]][current_pos[1]])
+    print(chr(pos_int))
 
     # starting pos is an S, this makes it an a to run the loop
     if pos_int == 83:
@@ -75,65 +81,60 @@ def find_shortest_path(current_pos:tuple, elav_map:list, path_count:int, found=F
     step_down = (current_pos[0] - 1, current_pos[1])
     step_up =  (current_pos[0] + 1, current_pos[1])
 
+    data = [
+        step_left,
+        step_right,
+        step_up,
+        step_down
+    ]
 
-    if pos_int == 69:
+
+    if current_pos == end_pos:
     # base case, found end
         found = True
-        print(f'path_count: {path_count}\nlast position: {current_pos}')
-
+        print(f'found end\npath_count: {path_count}\nlast position: {current_pos}')
         return path_count
 
-    blocked = False
-    loop_count = 0
+    
+    
+    
+    else:
+        blocked = False
+        loop_count = 0
 
-    while not blocked:
-        loop_count += 1
-
-        if can_step(pos_int, step_up):
-
-            #visited[step_up[0]][step_up[1]] = True
-
-            find_shortest_path(step_up, elav_map, path_count)
-
-        if can_step(pos_int, step_down):
-
-            #visited[step_down[0]][step_down[1]] = True
-
-            find_shortest_path(step_down, elav_map, path_count)
+        while not blocked and not found:
+            loop_count += 1
 
 
-        if can_step(pos_int, step_left):
+            for step in data:
+                if can_step(pos_int, step) and not found:
+                    path_count = find_shortest_path(step, end_pos, elev_map, path_count)
+               
+            
+            if loop_count == 1:
 
-            #visited[step_left[0]][step_left[1]] = True
+                blocked = True
+        return path_count
 
-            find_shortest_path(step_left, elav_map, path_count)
-
-
-        if can_step(pos_int, step_right):
-
-            #visited[step_right[0]][step_right[1]] = True
-
-            find_shortest_path(step_right, elav_map, path_count)
-
-        if loop_count ==10:
-            blocked = True
-            print('blocked')
-
-    print(f'{path_count}')
+    
 
 
 def plot_one(history):
     
-    
     fig = plt.figure(figsize=(20,10))
 
+
     ax = fig.add_subplot()
+
+    #ax.invert_yaxis()
+    ax.invert_xaxis()
+
     max_x = max([x[0] for x in history]) + 5
     max_y = max([x[1] for x in history]) + 5
 
     ax.set_xlim((-5, max_y))
     ax.set_ylim((-5, max_x))
-    frames = len(history + 1)
+    frames = len(history)
 
 
     #for dot_row in range(-10, max_y):
@@ -150,18 +151,20 @@ def plot_one(history):
 
         ax.plot(history[i][1], history[i][0], 'b+')
 
-    ani = animation.FuncAnimation(fig, animate, frames=frames, repeat=False, interval=20)
+    ani = animation.FuncAnimation(fig, animate, frames=frames, repeat=True, interval=20)
+
+    print('made it past animation object creation')
 
 
     writergif = animation.PillowWriter(fps=45)
 
-    #ani.save('AdventOfCode2022\\day12_visual.gif', writergif)
+    ani.save('AdventOfCode2022\\day12_visual.gif', writergif)
 
-    plt.show()
+    #plt.show()
 
 
 
-def part_one(elev_map: list) ->int:
+def part_one() -> None:
     """returns fewest steps possible from start to end"""
     for index, row in enumerate(elev_map):
 
@@ -171,13 +174,14 @@ def part_one(elev_map: list) ->int:
                 continue
             elif step == 'E':
                 end_pos = (index, count)
+                print(end_pos)
 
 
-    find_shortest_path(start_pos, elev_map, 0)
+    print(find_shortest_path(start_pos, end_pos, elev_map, 0))
     plot_one(step_hist)
 
 
 if __name__ == "__main__":
 
 
-    part_one(elev_map)
+    part_one()
