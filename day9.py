@@ -194,12 +194,12 @@ def show_plot_two(data: list[list[tuple[int,int]]]) -> None:
 
     ani = matplotlib.animation.FuncAnimation(fig, animate, frames=len(head_x_data), repeat=False, interval=50, cache_frame_data=False)
 
-    plt.show()
-    #save_path = 'AdventOfCode2022\\day9visual.gif'
-    #writergif = matplotlib.animation.PillowWriter(fps=30)
+    # plt.show()
+    save_path = 'AdventOfCode2022\\day9visual_parttwo.gif'
+    writergif = matplotlib.animation.PillowWriter(fps=10)
 
-    #ani.save(save_path, writer=writergif)
-    #print('saved gif')
+    ani.save(save_path, writer=writergif)
+    print('saved gif')
 
     return
 
@@ -346,7 +346,7 @@ def part_two(moves:list) -> int:
     tail_knot_visited = visited_pos_table[-1][:]
     visited = len(set(tail_knot_visited))
 
-    # show_plot_two(data = visited_pos_table)
+    show_plot_two(data = visited_pos_table)
     
     return visited
 
@@ -354,7 +354,7 @@ if __name__ == "__main__":
     path = 'AdventOfCode2022\\Day9_input.txt'
     test_path = 'AdventOfCode2022\\Day9_test_input.txt'
 
-    with open(path, 'rt', encoding='UTF-8') as inputfile:
+    with open(test_path, 'rt', encoding='UTF-8') as inputfile:
         moves = [x.strip('\n') for x in inputfile.readlines()]
 
     #print(part_one(moves, True))

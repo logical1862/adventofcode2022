@@ -79,8 +79,8 @@ def plot_one(history):
     
     plt.style.use('seaborn-pastel')
     ax = fig.add_subplot(projection='3d')
-    ticks = [x for x in range(1, len(history) + 1)]
-    labels=[f'monkey {x}' for x in range(1, len(history) + 1)]
+    ticks = [x for x in range(len(history) + 1)]
+    labels=[f'monkey {x + 1}' for x in range(len(history) + 1)]
     
     # plot monkey positions first, THEN thier items. do per item switch
 
@@ -113,7 +113,7 @@ def plot_one(history):
             z = [0]
 
             dx = [.5]
-            dy = [min([num_items, 7])]
+            dy = [min([num_items, 10])]
             dz = [num_items]
 
             ax.invert_xaxis()
@@ -126,7 +126,7 @@ def plot_one(history):
             ax.view_init(26, 80)
 
     ani = animation.FuncAnimation(fig, animate, frames=len(history[0]), repeat=False, interval=20, cache_frame_data=False)
-    writergif = animation.PillowWriter(fps=35)
+    writergif = animation.PillowWriter(fps=30)
 
     ani.save('AdventOfCode2022\\day11_visual.gif', writergif)
 

@@ -1,5 +1,4 @@
 import sys
-import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
@@ -47,7 +46,7 @@ def sort_closest(unsorted:list, current_pos:tuple, end_pos:tuple, path_count: in
         y_diff = abs(step[0] - end_pos[0])
         
         # lets try some real algo stuff
-        dis_score = path_count + x_diff + y_diff
+        dis_score = path_count + (x_diff + y_diff)
 
 
         distance_scores[index] = dis_score
@@ -58,6 +57,7 @@ def sort_closest(unsorted:list, current_pos:tuple, end_pos:tuple, path_count: in
     for i in range(4):
         #indexes are shared
         next_lowest_index = distance_scores.index(min(distance_scores))
+
         sorted_by_distance.append(unsorted[next_lowest_index])
 
 
@@ -67,7 +67,7 @@ def sort_closest(unsorted:list, current_pos:tuple, end_pos:tuple, path_count: in
 
     return sorted_by_distance
 
-    
+
 
 
 def can_step(pos:int, next_step:tuple) -> bool:
@@ -112,8 +112,7 @@ def find_shortest_path(current_pos:tuple, end_pos:tuple, elav_map:list, path_cou
     # starting pos is an S, this makes it an a to run the loop
     if pos_int == 83:
         pos_int = 97
-    
-    #3rd num is distance score calculated in sort
+
     step_left = (current_pos[0], current_pos[1] - 1)
     step_right = (current_pos[0], current_pos[1] + 1)
     step_down = (current_pos[0] - 1, current_pos[1])
@@ -126,13 +125,13 @@ def find_shortest_path(current_pos:tuple, end_pos:tuple, elav_map:list, path_cou
         step_up,
     ]
     sorted_closest = sort_closest(data, current_pos, end_pos, path_count)
-
+    #sorted_closest = data
     if current_pos == end_pos:
     # base case, found end
         found = True
         print(f'found end\npath_count: {path_count}\nlast position: {current_pos}')
         return path_count
-    
+
     else:
         blocked = False
         loop_count = 0
@@ -140,14 +139,15 @@ def find_shortest_path(current_pos:tuple, end_pos:tuple, elav_map:list, path_cou
         while not blocked and not found:
             loop_count += 1
 
-            # make set of available steps, calc distances and start with closest to object: abs of xdiff minus y diff
+        ########################dist values need checked on each step##################################
             for step in range(4):
 
                 if can_step(pos_int, sorted_closest[step]) and not found:
+  
                     path_count = find_shortest_path(sorted_closest[step], end_pos, elev_map, path_count)
 
                 if loop_count == 2:
-         
+
                     blocked = True
                     step_hist.pop()
                     return path_count - 1
@@ -166,11 +166,11 @@ def plot_one(history):
     #ax.invert_yaxis()
     ax.invert_xaxis()
 
-    max_x = max([x[0] for x in history]) + 5
-    max_y = max([x[1] for x in history]) + 5
+    max_x = max([x[0] for x in history]) + 1
+    max_y = max([x[1] for x in history]) + 1
 
-    ax.set_xlim((-5, max_y))
-    ax.set_ylim((-5, max_x))
+    ax.set_xlim((-1, max_y))
+    ax.set_ylim((-1, max_x))
     frames = len(history)
     x = [[ord(val) for val in line] for line in elev_map]
 
